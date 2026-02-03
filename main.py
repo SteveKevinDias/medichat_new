@@ -9,7 +9,6 @@ import json
 import uuid
 from pathlib import Path
 
-
 # ===================== PAGE CONFIG =====================
 st.set_page_config(
     page_title="MediChatBot",
@@ -34,7 +33,6 @@ st.markdown("""
 }
 </style>
 """, unsafe_allow_html=True)
-
 
 # ===================== PERSISTENT CHAT MEMORY =====================
 MEMORY_DIR = Path("chat_memory")
@@ -63,7 +61,6 @@ def delete_chat(chat_id):
     index = [c for c in load_chat_index() if c["id"] != chat_id]
     save_chat_index(index)
 
-
 def generate_chat_title(chat_model, messages):
     convo = "\n".join(
         [f"{m['role']}: {m['content']}" for m in messages[-8:]]
@@ -79,7 +76,6 @@ Title:
 """
     return ask_chat_model(chat_model, prompt).strip()
 
-
 # ===================== SESSION STATE =====================
 if "chat_id" not in st.session_state:
     st.session_state.chat_id = str(uuid.uuid4())
@@ -93,7 +89,6 @@ if "vectorstore" not in st.session_state:
 if "chat_model" not in st.session_state:
     st.session_state.chat_model = None
 
-
 # ===================== HEADER =====================
 st.markdown("""
 <div style="text-align:center; padding:2rem 0;">
@@ -101,7 +96,6 @@ st.markdown("""
 <p>Your Intelligent Medical Document Assistant</p>
 </div>
 """, unsafe_allow_html=True)
-
 
 # ===================== SIDEBAR =====================
 with st.sidebar:
@@ -143,8 +137,11 @@ with st.sidebar:
 
     if uploaded_files and st.button("🛠️ Process Documents"):
         with st.spinner("Processing documents..."):
+
+            # Extract text from uploaded PDFs
             texts = [extract_text_from_pdf(f) for f in uploaded_files]
 
+            # Split text into chunks
             splitter = RecursiveCharacterTextSplitter(
                 chunk_size=1000,
                 chunk_overlap=200
@@ -154,11 +151,16 @@ with st.sidebar:
             for t in texts:
                 chunks.extend(splitter.split_text(t))
 
+            # Merge with existing vectorstore if present
+            if st.session_state.vectorstore:
+                existing_texts = [d.page_content for d in st.session_state.vectorstore.docstore._dict.values()]
+                chunks = existing_texts + chunks
+
+            # Create or update vectorstore
             st.session_state.vectorstore = create_faiss_index(chunks)
             st.session_state.chat_model = get_chat_model(st.secrets["EURI_API_KEY"])
 
             st.success("✅ Documents processed successfully!")
-
 
 # ===================== MAIN CHAT =====================
 st.markdown("## 💬 Chat with your Medical Documents")
@@ -167,7 +169,6 @@ for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
         st.caption(msg["timestamp"])
-
 
 # ===================== CHAT INPUT =====================
 if prompt := st.chat_input("Ask about your medical documents..."):
@@ -193,7 +194,6 @@ if prompt := st.chat_input("Ask about your medical documents..."):
 
                 context = "\n\n".join([d.page_content for d in docs])
 
-                # ===== FULL CONTEXT AWARENESS (SAFE WINDOW) =====
                 history_text = "\n".join(
                     [f"{m['role'].upper()}: {m['content']}"
                      for m in st.session_state.messages[-12:]]
@@ -251,7 +251,6 @@ Provide a detailed, helpful answer:
     else:
         st.warning("⚠️ Please upload and process documents first.")
 
-
 # ===================== FOOTER =====================
 st.markdown("""
 <hr>
@@ -259,4 +258,3 @@ st.markdown("""
 🤖 Powered by Euri AI & LangChain | 🏥 Medical Document Intelligence
 </div>
 """, unsafe_allow_html=True)
-# ===================== END OF FILE =====================
