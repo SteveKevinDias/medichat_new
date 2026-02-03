@@ -18,7 +18,7 @@ def _compute_text_hash(texts: List[str]) -> str:
     return hashlib.md5("".join(texts).encode("utf-8")).hexdigest()
 
 
-def load_or_create_faiss(texts: List[str]) -> FAISS:
+def create_faiss_index(texts: List[str]) -> FAISS:
     """
     - If FAISS index exists AND text unchanged -> load only
     - If new text detected -> recreate embeddings
