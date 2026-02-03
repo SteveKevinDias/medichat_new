@@ -61,5 +61,5 @@ def retrieve_similar_documents(
     vectorstore: FAISS,
     query: str,
     k: int = 4
-):
+    ):
     return vectorstore.similarity_search(query, k=k)
