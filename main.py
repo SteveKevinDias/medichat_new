@@ -78,7 +78,12 @@ Title:
 
 # ===================== SESSION STATE =====================
 if "chat_id" not in st.session_state:
-    st.session_state.chat_id = str(uuid.uuid4())
+    chat_index = load_chat_index()
+    if chat_index:
+        # load most recent chat
+        st.session_state.chat_id = chat_index[-1]["id"]
+    else:
+        st.session_state.chat_id = str(uuid.uuid4())
 
 if "messages" not in st.session_state:
     st.session_state.messages = load_chat(st.session_state.chat_id)
