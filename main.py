@@ -40,6 +40,15 @@ MEMORY_DIR.mkdir(exist_ok=True)
 
 INDEX_FILE = MEMORY_DIR / "chat_index.json"
 
+def ensure_chat_in_index(chat_id):
+    index = load_chat_index()
+    if not any(c["id"] == chat_id for c in index):
+        index.append({
+            "id": chat_id,
+            "title": "New Medical Chat"
+        })
+        save_chat_index(index)
+
 def load_chat_index():
     return json.loads(INDEX_FILE.read_text()) if INDEX_FILE.exists() else []
 
@@ -238,6 +247,7 @@ Provide a detailed, helpful answer:
             "content": response,
             "timestamp": timestamp
         })
+        ensure_chat_in_index(st.session_state.chat_id)
         save_chat(st.session_state.chat_id, st.session_state.messages)
 
         # ===== CHAT TITLE UPDATE =====
