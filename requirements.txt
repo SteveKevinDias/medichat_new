@@ -1,0 +1,24 @@
+# Streamlit frontend
+streamlit
+
+# PDF processing
+PyMuPDF
+camelot-py
+pandas
+pypdf
+
+# RAG / Vectorstores
+langchain
+langchain_community
+faiss-cpu
+
+# Embeddings
+sentence-transformers
+
+# EURI API / Chat
+euriai
+
+# Utilities
+numpy
+uuid
+pathlib
