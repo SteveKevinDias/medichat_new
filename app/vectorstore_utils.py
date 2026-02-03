@@ -1,6 +1,7 @@
 import os
 import hashlib
 from typing import List
+import streamlit as st
 
 from langchain_community.vectorstores import FAISS
 from langchain_community.embeddings import HuggingFaceEmbeddings
@@ -42,10 +43,10 @@ def create_faiss_index(texts: List[str]) -> FAISS:
 
         # No change → retrieval only
         if new_hash == old_hash:
-            print("✅ Existing embeddings reused")
+            st.success("✅ Existing embeddings reused")
             return vectorstore
 
-        print("🔄 New content detected → rebuilding embeddings")
+        st.success( "🔄 New content detected → rebuilding embeddings")
 
     # 🔹 Case 2: First time OR new content
     vectorstore = FAISS.from_texts(texts, embeddings)
