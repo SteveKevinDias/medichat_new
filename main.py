@@ -251,18 +251,31 @@ Provide a detailed, helpful answer:
         save_chat(st.session_state.chat_id, st.session_state.messages)
 
         # ===== CHAT TITLE UPDATE =====
+        # Load index
         index = load_chat_index()
-        if not any(c["id"] == st.session_state.chat_id for c in index):
-            title = generate_chat_title(
-                st.session_state.chat_model,
-                st.session_state.messages
-            )
+
+        # Generate title/summary for the current chat
+        title = generate_chat_title(
+            st.session_state.chat_model,
+            st.session_state.messages
+        )
+
+        # Update index if chat exists, else append new
+        found = False
+        for c in index:
+            if c["id"] == st.session_state.chat_id:
+                c["title"] = title
+                found = True
+                break
+        if not found:
             index.append({
                 "id": st.session_state.chat_id,
                 "title": title
             })
-            save_chat_index(index)
 
+        save_chat_index(index)
+
+        
     else:
         st.warning("⚠️ Please upload and process documents first.")
 
